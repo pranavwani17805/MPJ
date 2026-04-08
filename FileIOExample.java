@@ -1,50 +1,71 @@
+package polymorphism;
+
 import java.io.*;
+import java.util.Scanner;
 
-public class FileIOExample {
-
+public class BankApp {
     public static void main(String[] args) {
+        Scanner input = new Scanner(System.in);
+        String filePath = "test.txt";
 
-        // Writing to a file
         try {
-            FileWriter writer = new FileWriter("sample.txt");
-            writer.write("Hello, this is a File I/O example in Java.\n");
-            writer.write("Exception handling is important!");
-            writer.close();
+            PrintStream originalOut = System.out;
+            PrintStream fileStream = new PrintStream(new FileOutputStream(filePath, true));
 
-            System.out.println("Data written successfully.");
+            System.out.println("\n=== Banking System ===");
+            System.out.println("1. Open New Account");
+            System.out.println("2. Quit");
+            originalOut.print("Select option: ");
+            int option = input.nextInt();
 
-        } catch (IOException e) {
-            System.out.println("Error while writing to file: " + e.getMessage());
-        }
+            if (option == 1) {
+                originalOut.print("Enter Customer ID (1-20): ");
+                int id = input.nextInt();
 
-        // Reading from a file
-        try {
-            FileReader reader = new FileReader("sample.txt");
-            BufferedReader br = new BufferedReader(reader);
+                if (id < 1 || id > 20) {
+                    throw new Exception("Customer ID must be between 1 and 20.");
+                }
 
-            String line;
-            System.out.println("\nReading data from file:");
+                originalOut.print("Enter Deposit Amount: ");
+                double deposit = input.nextDouble();
 
-            while ((line = br.readLine()) != null) {
-                System.out.println(line);
+                if (deposit < 1000) {
+                    throw new Exception("Initial deposit must be at least Rs. 1000.");
+                }
+
+                // Redirect output to file
+                System.setOut(fileStream);
+
+                System.out.println("ID: " + id);
+                System.out.println("Amount Deposited: " + deposit);
+                System.out.println("Account Created Successfully");
+                System.out.println("============================");
+
+                // Restore console output
+                System.setOut(originalOut);
+                System.out.println("Record stored in " + filePath);
             }
 
-            br.close();
+            fileStream.close();
 
-        } catch (FileNotFoundException e) {
-            System.out.println("File not found: " + e.getMessage());
+            System.out.print("\nView saved data? (yes/no): ");
+            String response = input.next();
 
-        } catch (IOException e) {
-            System.out.println("Error while reading file: " + e.getMessage());
+            if (response.equalsIgnoreCase("yes")) {
+                File file = new File(filePath);
+                Scanner reader = new Scanner(file);
+
+                System.out.println("\n=== File Contents ===");
+                while (reader.hasNextLine()) {
+                    System.out.println(reader.nextLine());
+                }
+                reader.close();
+            }
+
+        } catch (Exception ex) {
+            System.out.println("Exception: " + ex.getMessage());
         }
 
-        // Demonstrating finally block
-        try {
-            int result = 10 / 0;  // This will cause ArithmeticException
-        } catch (ArithmeticException e) {
-            System.out.println("\nArithmetic Exception occurred: " + e.getMessage());
-        } finally {
-            System.out.println("Finally block executed (cleanup code).");
-        }
+        input.close();
     }
 }
